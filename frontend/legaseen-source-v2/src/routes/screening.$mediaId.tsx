@@ -75,8 +75,13 @@ function Screening({ media, vault, segments, siblings, videoUrl, sidecar, captio
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
   const [result, setResult] = useState<SearchResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [chaptersPanel, setChaptersPanel] = useState<PanelState>("collapsed");
-  const [transcriptPanel, setTranscriptPanel] = useState<PanelState>("collapsed");
+  // Both panels open on arrival. The indexed chapters and the synchronized
+  // transcript are what separates this from a video file in a folder, and
+  // starting them collapsed made the page introduce itself as a plain player
+  // that happens to have two buttons above it. Either can still be collapsed
+  // to its header or closed outright; the layout follows.
+  const [chaptersPanel, setChaptersPanel] = useState<PanelState>("open");
+  const [transcriptPanel, setTranscriptPanel] = useState<PanelState>("open");
   const [photosOpen, setPhotosOpen] = useState(false);
   // A recording in another language carries an English track for the family.
   const english = sidecar?.translations?.["en"] ?? null;
