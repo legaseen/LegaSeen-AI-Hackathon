@@ -10,7 +10,7 @@ import { RequireSession } from "@/components/require-session";
 import { BackLink, Pager } from "@/components/nav-arrows";
 import { DeleteRecordingButton } from "@/components/delete-recording";
 import { STATE_LABEL, isBusy, useProcessing } from "@/lib/processing";
-import { search, signedVideoUrl, supabase, type MediaAsset, type SearchResult, type Segment, type Vault } from "@/lib/supabase";
+import { canEditVault, search, signedVideoUrl, supabase, type MediaAsset, type SearchResult, type Segment, type Vault } from "@/lib/supabase";
 import { fetchSidecar, signedUrl, signedUrls, useSyncedTranscript, type Chapter, type Sidecar } from "@/lib/transcript";
 import { formatTime, playSegment } from "@/lib/playSegment";
 import { fmtDate } from "@/lib/format";
@@ -47,7 +47,8 @@ async function loadInterview(mediaId: string) {
     ? await signedUrls("interview-videos", sidecar.chapters.map((c) => c.thumbnail_path).filter((p): p is string => !!p))
     : {};
   const photoUrls = sidecar ? await signedUrls("archival-photos", sidecar.photo_moments.map((p) => p.storage_path)) : {};
-  return { media, vault: (v ?? null) as Vault | null, segments: (s ?? []) as Segment[], siblings, videoUrl, sidecar, captionsUrl, captionsEnUrl, thumbs, photoUrls };
+  const canEdit = await canEditVault(media.vault_id);
+  return { media, vault: (v ?? null) as Vault | null, segments: (s ?? []) as Segment[], siblings, videoUrl, sidecar, captionsUrl, captionsEnUrl, thumbs, photoUrls, canEdit };
 }
 
 function ScreeningPage() {
@@ -64,10 +65,10 @@ function ScreeningPageInner() {
   return <Screening {...data} vault={data.vault} initialSegId={initialSegId ?? null} />;
 }
 
-function Screening({ media, vault, segments, siblings, videoUrl, sidecar, captionsUrl, captionsEnUrl, thumbs, photoUrls, initialSegId }: {
+function Screening({ media, vault, segments, siblings, videoUrl, sidecar, captionsUrl, captionsEnUrl, thumbs, photoUrls, canEdit, initialSegId }: {
   media: MediaAsset; vault: Vault; segments: Segment[]; siblings: Pick<MediaAsset, "id" | "title" | "created_at">[];
   videoUrl: string | null; sidecar: Sidecar | null;
-  captionsUrl: string | null; captionsEnUrl: string | null; thumbs: Record<string, string>; photoUrls: Record<string, string>; initialSegId: string | null;
+  captionsUrl: string | null; captionsEnUrl: string | null; thumbs: Record<string, string>; photoUrls: Record<string, string>; canEdit: boolean; initialSegId: string | null;
 }) {
   const initial = initialSegId ? segments.find((s) => s.id === initialSegId) ?? null : null;
   const [activeId, setActiveId] = useState<string | null>(initial?.id ?? null);
@@ -190,12 +191,12 @@ function Screening({ media, vault, segments, siblings, videoUrl, sidecar, captio
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <DeleteRecordingButton media={media} title={media.title} onDeleted={async () => {
+            {canEdit && <DeleteRecordingButton media={media} title={media.title} onDeleted={async () => {
               await queryClient.invalidateQueries({ queryKey: ["vault", vault.id] });
               await queryClient.invalidateQueries({ queryKey: ["vaults"] });
               queryClient.removeQueries({ queryKey: ["interview", media.id] });
               await navigate({ to: "/vault/$vaultId", params: { vaultId: vault.id } });
-            }} />
+            }} />}
             <Pager label="Recording" index={Math.max(0, sibIndex)} total={siblings.length}
                    prevLink={prevSib ? { to: "/screening/$mediaId", params: { mediaId: prevSib.id } } : null}
                    nextLink={nextSib ? { to: "/screening/$mediaId", params: { mediaId: nextSib.id } } : null} />

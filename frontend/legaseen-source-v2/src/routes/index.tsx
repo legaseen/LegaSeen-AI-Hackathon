@@ -271,20 +271,22 @@ function CommissionForm({ onDone }: { onDone: () => void }) {
     // page's Maternal/Paternal filter reads it.
     const description = [lineage ? `${lineage} lineage.` : "", notes.trim()].filter(Boolean).join(" ") || null;
 
-    const { data, error } = await supabase.from("vaults")
-      .insert({ owner_id: uid, name, subject_name: subjectName, description })
-      .select("id").single();
+    // The id is generated here rather than read back, because asking for the
+    // new row in the same statement fails: the vaults SELECT policy calls
+    // is_vault_member(), a STABLE SECURITY DEFINER function that queries
+    // vaults itself and so cannot see a row still being inserted. The insert
+    // is allowed; only the RETURNING clause was being refused. Knowing the id
+    // up front means we never need it back.
+    const id = crypto.randomUUID();
+    const { error } = await supabase.from("vaults")
+      .insert({ id, owner_id: uid, name, subject_name: subjectName, description });
     setBusy(false);
 
-    if (error) {
-      const rls = /row-level security/i.test(error.message);
-      return setErr(rls
-        ? "The archive database isn't accepting new vaults yet — its vault-creation policy still needs to be restored by the schema owner. Nothing was created."
-        : error.message);
-    }
+    if (error) return setErr(error.message);
+
     await queryClient.invalidateQueries({ queryKey: ["vaults"] });
     onDone();
-    navigate({ to: "/vault/$vaultId", params: { vaultId: data.id } });
+    navigate({ to: "/vault/$vaultId", params: { vaultId: id } });
   }
 
   const field = "mt-1.5 h-11 w-full border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-gold";

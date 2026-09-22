@@ -82,3 +82,21 @@ export async function signedVideoUrl(storagePath: string): Promise<string> {
   if (error) throw error;
   return data.signedUrl;
 }
+
+/**
+ * Whether the signed-in person may add to or remove from this vault — the
+ * vault's owner, or a `vault_members` row with role 'editor'. Viewers (the
+ * judges' demo account, family who were given read access) get a read-only
+ * archive rather than buttons that fail when pressed. RLS enforces this
+ * regardless; this only keeps the UI honest.
+ */
+export async function canEditVault(vaultId: string): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return false;
+  const uid = session.user.id;
+  const { data: vault } = await supabase.from("vaults").select("owner_id").eq("id", vaultId).maybeSingle();
+  if (vault?.owner_id === uid) return true;
+  const { data: member } = await supabase.from("vault_members").select("role")
+    .eq("vault_id", vaultId).eq("user_id", uid).maybeSingle();
+  return member?.role === "editor";
+}

@@ -29,3 +29,6 @@ web/
 
 # Local test fixture (synthetic, not committed)
 fixtures/
+
+# Supabase CLI scratch
+supabase/.temp/

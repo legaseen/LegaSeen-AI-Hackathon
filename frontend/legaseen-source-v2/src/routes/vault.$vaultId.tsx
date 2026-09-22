@@ -13,7 +13,7 @@ import { TierCards } from "@/components/tier-cards";
 import { RecordStoryDialog, type DialogMode } from "@/components/record-story";
 import { displayName, useSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { search, supabase, type MediaAsset, type SearchResult, type Segment, type Vault } from "@/lib/supabase";
+import { search, supabase, type MediaAsset, type SearchResult, type Segment, type Vault, canEditVault } from "@/lib/supabase";
 import { signedUrls } from "@/lib/transcript";
 import { say } from "@/lib/interviewer";
 import { formatTime } from "@/lib/playSegment";
@@ -32,7 +32,8 @@ async function loadVault(vaultId: string) {
   const { data: s } = await supabase.from("story_segments").select("*").eq("vault_id", vaultId).order("start_seconds");
   const interviews = (m ?? []) as MediaAsset[];
   const posters = await signedUrls("interview-videos", interviews.map((x) => `${vaultId}/${x.id}-poster.jpg`));
-  return { vault: (v ?? null) as Vault | null, interviews, segments: (s ?? []) as Segment[], posters };
+  const canEdit = await canEditVault(vaultId);
+  return { vault: (v ?? null) as Vault | null, interviews, segments: (s ?? []) as Segment[], posters, canEdit };
 }
 
 function VaultPage() {
@@ -63,7 +64,7 @@ function VaultPageInner() {
   }, [processing.data, queryClient, vaultId]);
 
   if (isLoading || !data) return <ArchiveShell vaultId={vaultId}><LoadingBlock label="Unlocking the vault…" /></ArchiveShell>;
-  const { vault, interviews, segments, posters } = data;
+  const { vault, interviews, segments, posters, canEdit } = data;
   if (!vault) return <ArchiveShell><LoadingBlock label="This vault is not in your custody." /></ArchiveShell>;
 
   const bySource = new Map<string, Segment[]>();
@@ -107,8 +108,13 @@ function VaultPageInner() {
           </div>
         </div>
 
-        {interviews.length === 0 && (
-          <TierCards vault={vault} custodian={displayName(session)} onRecord={(m) => { setRecMode(m); setRecOpen(true); }} />
+        {interviews.length === 0 && (canEdit
+          ? <TierCards vault={vault} custodian={displayName(session)} onRecord={(m) => { setRecMode(m); setRecOpen(true); }} />
+          : <p className="mt-4 border border-gold bg-secondary px-4 py-3 text-sm text-navy">
+              <span className="font-bold">You have read-only access to this vault.</span> Everything recorded here is yours to
+              watch, search and listen back to. Adding a recording — including a guided interview — is reserved for the family
+              member who holds custody.
+            </p>
         )}
         <RecordStoryDialog vault={vault} custodian={displayName(session)} open={recOpen} mode={recMode} onOpenChange={setRecOpen}
                            onSaved={async () => {
@@ -119,7 +125,9 @@ function VaultPageInner() {
 
         <div className="mt-6 flex items-center justify-between">
           <p className="eyebrow">{interviews.length ? "Recordings in this vault" : "Recordings"}</p>
-          <Button variant="outline" size="sm" onClick={() => { setRecMode("choose"); setRecOpen(true); }}><Plus /> Add a recording</Button>
+          {canEdit
+            ? <Button variant="outline" size="sm" onClick={() => { setRecMode("choose"); setRecOpen(true); }}><Plus /> Add a recording</Button>
+            : <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">Read-only access</span>}
         </div>
         {interviews.length === 0 && <p className="mt-4 text-sm text-muted-foreground">Nothing recorded yet — choose a path above.</p>}
         <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
