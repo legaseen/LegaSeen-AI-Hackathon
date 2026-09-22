@@ -161,9 +161,12 @@ function phaseInfo(i: number) {
   return { index: i, id: p.id, title: p.title, total: PHASES.length, turns: p.turns };
 }
 
-// Supabase sets the port itself in production; PORT lets it run beside the
-// search function locally.
-Deno.serve({ port: Number(Deno.env.get("PORT") ?? 8000) }, async (req: Request) => {
+// In production the Supabase runtime assigns the port, so pass no options.
+// PORT is set only for local dev, to run beside the search function.
+const PORT = Deno.env.get("PORT");
+const serveOptions = PORT ? { port: Number(PORT) } : {};
+
+Deno.serve(serveOptions, async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
