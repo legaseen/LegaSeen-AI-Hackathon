@@ -32,13 +32,17 @@ STALE_MINUTES = 30            # an in-progress claim older than this is reclaime
 RESIGNIN_MINUTES = 45         # the editor's JWT lasts an hour; sign in again well before
 SCRIPTS = REPO_ROOT / "scripts"
 
+# `required` marks the two steps the recording cannot exist without: Scribe's
+# transcript, and publishing it where the app can read it. The three in between
+# enrich that transcript — chapters, a translation, matched photographs — and a
+# recording without them is diminished, not lost. They are allowed to fail.
 STEPS = [
-    # state         script             label shown in the app
-    ("transcribing", "transcribe.py",   "Transcribing with Scribe"),
-    ("chaptering",   "segment.py",      "Finding the chapters"),
-    ("translating",  "translate.py",    "Translating for the family"),
-    ("photos",       "match_photos.py", "Matching photographs"),
-    ("publishing",   "publish.py",      "Publishing to the vault"),
+    # state         script             label shown in the app          required
+    ("transcribing", "transcribe.py",   "Transcribing with Scribe",    True),
+    ("chaptering",   "segment.py",      "Finding the chapters",        False),
+    ("translating",  "translate.py",    "Translating for the family",  False),
+    ("photos",       "match_photos.py", "Matching photographs",        False),
+    ("publishing",   "publish.py",      "Publishing to the vault",     True),
 ]
 
 
@@ -86,7 +90,8 @@ def process(client, vault_id: str, media_id: str, title: str) -> None:
 
     print(f"\n{now()}  processing {title!r} ({media_id})")
     chapters = 0
-    for state, script, label in STEPS:
+    degraded: list[str] = []          # enrichments that were asked for and did not happen
+    for state, script, label, required in STEPS:
         if script == "match_photos.py" and chapters == 0:
             status["steps"].append({"step": state, "skipped": "no chapters"})
             continue
@@ -103,14 +108,30 @@ def process(client, vault_id: str, media_id: str, title: str) -> None:
             print(f"  [{media_id[:8]}] chaptering   nothing to chapter ({secs}s)")
             continue
         if code != 0:
-            update("failed", f"{label} failed", error=tail)
-            return
+            if required:
+                update("failed", f"{label} failed", error=tail)
+                return
+            # An enrichment failed — a dead OpenAI key, a rate limit, a blip.
+            # Her words are already transcribed and they are the part that
+            # matters, so carry on and publish them rather than throwing the
+            # whole recording away over a missing set of chapter titles.
+            degraded.append(state)
+            status["steps"][-1]["degraded"] = True
+            print(f"  [{media_id[:8]}] {state:12} failed, continuing without it ({secs}s): {tail.splitlines()[-1] if tail else 'no output'}")
+            continue
         if script == "segment.py":
             seg_file = REPO_ROOT / "data" / media_id / "segments.json"
             chapters = len(json.loads(seg_file.read_text())) if seg_file.exists() else 0
 
-    update("done", f"Ready · {chapters} chapter{'s' if chapters != 1 else ''}" if chapters else "Ready · too short for chapters",
-           chapters=chapters, finished_at=now())
+    if chapters:
+        message = f"Ready · {chapters} chapter{'s' if chapters != 1 else ''}"
+    elif degraded:
+        # Say what they actually have, rather than implying the recording was
+        # too short when in fact a step broke.
+        message = "Ready · transcript only"
+    else:
+        message = "Ready · too short for chapters"
+    update("done", message, chapters=chapters, degraded=degraded, finished_at=now())
 
 
 def find_work(client) -> list[tuple[str, str, str]]:
