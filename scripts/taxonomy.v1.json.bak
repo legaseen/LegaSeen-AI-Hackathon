@@ -1,0 +1,20 @@
+{
+  "_comment": "The canonical tag vocabulary for story_segments. The database does NOT constrain these values (no CHECK, no enum), so this file is the only source of truth. The UI must render pills from the same lists. Any tag the LLM returns that is not listed here is dropped.",
+  "topics": [
+    "Family", "Childhood", "Work", "Love & Marriage", "Migration",
+    "War & Service", "Home & Place", "Faith", "Health", "Loss",
+    "Friendship", "Life Lessons"
+  ],
+  "emotions": [
+    "Joyful", "Proud", "Grateful", "Nostalgic", "Isolated",
+    "Uncertain", "Grieving", "Determined", "Amused", "Regretful"
+  ],
+  "wisdom_tags": [
+    "Resilience", "Overcoming Hardship", "Hard Work", "Kindness",
+    "Family First", "Making Do", "Courage", "Forgiveness", "Perspective"
+  ],
+  "era": [
+    "1930s", "1940s", "1950s", "1960s", "1970s",
+    "1980s", "1990s", "2000s", "Timeless"
+  ]
+}

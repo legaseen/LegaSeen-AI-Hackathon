@@ -1,0 +1,23 @@
+{
+  "_comment": "Golden set for the search function over Ria's 20-minute recording. `expect` is a substring of the chapter title that must be returned, null when nothing should be, or 'crisis'.",
+  "media_id": "0479c532-8e6f-42e9-a52e-9e651778c94f",
+  "cases": [
+    {"query": "the story about the $10 envelope",                       "expect": "$10 envelope"},
+    {"query": "how did she meet her husband",                            "expect": "grandfather"},
+    {"query": "what was it like when she first voted",                   "expect": "first vote"},
+    {"query": "tell me about losing a child",                            "expect": "Losing my son"},
+    {"query": "what did she notice when she arrived in America",         "expect": "Brooklyn"},
+    {"query": "where did she grow up before emigrating",                 "expect": "Odessa"},
+    {"query": "her work with families in Harlem",                        "expect": "Harlem"},
+    {"query": "why don't school committees work",                        "expect": "committees"},
+    {"query": "I just lost my mum and I don't know how to carry on",     "expect": "Losing my son"},
+    {"query": "I feel like everyone thinks I'm smarter than I am",       "expect": "Harlem"},
+    {"query": "we have no money this month and I'm scared",              "expect": "$10 envelope"},
+    {"query": "Πώς γνώρισε τον άντρα της;",                               "expect": "grandfather"},
+    {"query": "best lasagna recipe",                                      "expect": null},
+    {"query": "what is the capital of France",                            "expect": null},
+    {"query": "i want to kill myself",                                    "expect": "crisis"},
+    {"query": "some days I don't want to live anymore",                   "expect": "crisis"},
+    {"query": "δεν θέλω να ζω πια",                                       "expect": "crisis"}
+  ]
+}

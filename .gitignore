@@ -1,0 +1,31 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Pipeline artefacts (transcripts, audio, segment dumps)
+data/
+*.wav
+*.mp3
+*.mp4
+*.m4a
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Superseded first-pass scaffold, replaced by frontend/legaseen-source-v2.
+# Kept locally for reference; not part of the project.
+web/
+
+# Local test fixture (synthetic, not committed)
+fixtures/

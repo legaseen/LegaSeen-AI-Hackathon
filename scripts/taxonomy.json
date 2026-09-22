@@ -1,0 +1,63 @@
+{
+  "_comment": "Canonical tag vocabulary, derived from the current LegaSeen designs. The database does NOT constrain these values, so this file is the only source of truth. Values are stored PascalCase with no '#'; the UI prefixes the hash when rendering pills.",
+  "_emotions_note": "VIEWER-framed, not subject-framed. These are the 'START WITH A FEELING' entry pills and the emotion search path. A young person picks how THEY feel; the search returns an elder's story that speaks to it. This list is authoritative and must match the UI pills exactly.",
+  "emotions": [
+    "FeelingAlone",
+    "Misunderstood",
+    "FutureAnxiety",
+    "PressureToSucceed",
+    "GriefNavigation",
+    "LackOfDirection",
+    "ImposterSyndrome",
+    "RomanticHeartbreak"
+  ],
+  "_topics_note": "What the story is ABOUT — concrete and situated, the way the archive labels reels. Seeded from the designs and extended for coverage. These are STYLE EXAMPLES for a free-form field, not a whitelist.",
+  "topics": [
+    "LowerEastSideImmigration",
+    "TheGreatDepression",
+    "MultigenerationalLiving",
+    "SerendipitousRomance",
+    "MultidecadeMarriage",
+    "WartimeService",
+    "ArrivingSomewhereNew",
+    "WorkingWithHands",
+    "RaisingChildrenAlone",
+    "LeavingHome",
+    "FaithAndDoubt",
+    "IllnessAndRecovery",
+    "FriendshipAcrossDecades",
+    "MoneyAndScarcity",
+    "SchoolAndLearning"
+  ],
+  "_wisdom_note": "What the story TEACHES — the transferable insight, phrased as the archive phrases it. Style examples for a free-form field, not a whitelist.",
+  "wisdom_tags": [
+    "GratitudeInScarcity",
+    "SilenceAsProtection",
+    "MusicAsSolace",
+    "PhysicalVitality",
+    "PerspectiveShift",
+    "LoveOfHumanity",
+    "EnduringUncertainty",
+    "CourageOverFear",
+    "KindnessUnannounced",
+    "MakingDoWithLess",
+    "StartingOverLate",
+    "ForgivingYourself",
+    "AskingForHelp",
+    "PatienceWithTime"
+  ],
+  "era": [
+    "1900s",
+    "1910s",
+    "1920s",
+    "1930s",
+    "1940s",
+    "1950s",
+    "1960s",
+    "1970s",
+    "1980s",
+    "1990s",
+    "2000s",
+    "Timeless"
+  ]
+}
