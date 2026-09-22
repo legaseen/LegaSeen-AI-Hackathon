@@ -4,9 +4,10 @@ import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 import { useAuthProviders } from "@/lib/auth";
+import { demoConfigured, enterDemo } from "@/lib/demo";
 
 type Notice = { tone: "error" | "ok"; text: string } | null;
-type Busy = null | "password" | "google" | "github" | "reset";
+type Busy = null | "password" | "google" | "github" | "reset" | "demo";
 
 /**
  * Split sign-in page: full-bleed portrait on the left, form on the right.
@@ -48,6 +49,14 @@ export function LoginPage() {
     setBusy(null);
     setNotice(error ? { tone: "error", text: error.message }
                     : { tone: "ok", text: `Password reset instructions have been sent to ${email.trim()}.` });
+  }
+
+  async function enterAsGuest() {
+    setBusy("demo"); setNotice(null);
+    const message = await enterDemo();
+    if (message) { setBusy(null); setNotice({ tone: "error", text: message }); }
+    // On success the session lands and the caller swaps this page for the archive,
+    // so the button stays disabled rather than flashing back to its idle label.
   }
 
   const field =
@@ -150,6 +159,21 @@ export function LoginPage() {
                 <span className="text-sm font-medium text-foreground">{busy === "github" ? "Redirecting…" : "Continue with GitHub"}</span>
               </button>
             </div>
+            {demoConfigured && (
+              <>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+                  <div className="relative flex justify-center text-sm"><span className="bg-card px-2 text-muted-foreground">visiting?</span></div>
+                </div>
+                <button type="button" onClick={enterAsGuest} disabled={busy !== null}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-gold bg-secondary px-4 py-3 font-medium text-navy transition-colors hover:bg-gold/20 disabled:opacity-60">
+                  {busy === "demo" ? "Opening the archive…" : "Enter as a guest — no account needed"} <ArrowRight className="size-4" />
+                </button>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Opens a prepared family archive with every feature unlocked.
+                </p>
+              </>
+            )}
           </form>
         </div>
       </div>

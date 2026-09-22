@@ -32,3 +32,4 @@ fixtures/
 
 # Supabase CLI scratch
 supabase/.temp/
+.gstack/

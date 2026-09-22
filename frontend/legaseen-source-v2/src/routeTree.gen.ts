@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as GalleryVaultIdRouteImport } from './routes/gallery.$vaultId'
 import { Route as ScreeningMediaIdRouteImport } from './routes/screening.$mediaId'
@@ -18,6 +19,11 @@ import { Route as VaultVaultIdRouteImport } from './routes/vault.$vaultId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -43,6 +49,7 @@ const VaultVaultIdRoute = VaultVaultIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/signup': typeof SignupRoute
   '/gallery/$vaultId': typeof GalleryVaultIdRoute
   '/screening/$mediaId': typeof ScreeningMediaIdRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/signup': typeof SignupRoute
   '/gallery/$vaultId': typeof GalleryVaultIdRoute
   '/screening/$mediaId': typeof ScreeningMediaIdRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/demo': typeof DemoRoute
   '/signup': typeof SignupRoute
   '/gallery/$vaultId': typeof GalleryVaultIdRoute
   '/screening/$mediaId': typeof ScreeningMediaIdRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/demo'
     | '/signup'
     | '/gallery/$vaultId'
     | '/screening/$mediaId'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/demo'
     | '/signup'
     | '/gallery/$vaultId'
     | '/screening/$mediaId'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/demo'
     | '/signup'
     | '/gallery/$vaultId'
     | '/screening/$mediaId'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DemoRoute: typeof DemoRoute
   SignupRoute: typeof SignupRoute
   GalleryVaultIdRoute: typeof GalleryVaultIdRoute
   ScreeningMediaIdRoute: typeof ScreeningMediaIdRoute
@@ -102,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DemoRoute: DemoRoute,
   SignupRoute: SignupRoute,
   GalleryVaultIdRoute: GalleryVaultIdRoute,
   ScreeningMediaIdRoute: ScreeningMediaIdRoute,
